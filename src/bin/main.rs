@@ -27,14 +27,15 @@ fn main() -> ! {
     let mut gpioa = dp.GPIOA.split();
     
 
-    // Configure pa4, pb1 as pull down input
-    let mut in_4 = gpioa.pa4.as_pull_down_input(&mut gpioa.crl, f);// what is f?
-
-
-
+    // Configure pa4 as pull down input
+    let mut inp_4 = gpioa.pa4.into_pull_down_input(&mut gpioa.crl);
 
 
     loop {
-
+        if inp_4.is_high() {
+            defmt::println!("high")
+        }else {
+            defmt::println!("low")
+        }
     }
 }
