@@ -2,6 +2,8 @@
 #![no_std]
 #![cfg_attr(not(doc), no_main)]
 
+
+
 use sisma as _; // global logger + panicking-behavior + memory layout
 
 use nb::block;
@@ -29,13 +31,31 @@ fn main() -> ! {
 
     // Configure pa4 as pull down input
     let mut inp_4 = gpioa.pa4.into_pull_down_input(&mut gpioa.crl);
+    //Configure pa5 as pull down
+    let mut inp_5 = gpioa.pa5.into_pull_down_input(&mut gpioa.crl);
 
+    // Configure the syst timer to trigger an update every 50ms
+    let mut timer = Timer::syst(cp.SYST, &clocks).counter_hz();
+    timer.start(1.Hz()).unwrap();//50 ms
+    let mut count = 0;
+    
 
     loop {
         if inp_4.is_high() {
-            defmt::println!("high")
+            count += 1;
+            defmt::println!("{}",count);
+            block!(timer.wait()).unwrap();
+            defmt::println!("4 is high")
+        }else if inp_4.is_low(){
+            block!(timer.wait()).unwrap();
+            defmt::println!("4 is low low")
+        }
+        if inp_5.is_high() {
+            block!(timer.wait()).unwrap();
+            defmt::println!("5 is high")
         }else {
-            defmt::println!("low")
+            block!(timer.wait()).unwrap();
+            defmt::println!("5 is low")
         }
     }
 }
