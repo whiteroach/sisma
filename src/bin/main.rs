@@ -25,14 +25,18 @@ fn main() -> ! {
     let clocks = rcc.cfgr.freeze(&mut flash.acr);
 
 
-    // Setup GPIOB
+    // Setup GPIOA
     let mut gpioa = dp.GPIOA.split();
-    
+    //Setup GPIOC
+    let mut gpioc = dp.GPIOC.split();
 
     // Configure pa4 as pull down input
     let mut inp_4 = gpioa.pa4.into_pull_down_input(&mut gpioa.crl);
     //Configure pa5 as pull down
     let mut inp_5 = gpioa.pa5.into_pull_down_input(&mut gpioa.crl);
+    //Configure embeded led
+    let mut led = gpioc.pc13.into_push_pull_output(&mut gpioc.crh);
+
 
     // Configure the syst timer to trigger an update every 50ms
     let mut timer = Timer::syst(cp.SYST, &clocks).counter_hz();
