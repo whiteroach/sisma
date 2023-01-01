@@ -4,7 +4,7 @@
 use defmt_rtt as _; // global logger
 
 // TODO(5) adjust HAL import
-use stm32f1xx_hal::{pac, prelude::*, serial::Serial, serial::Config};// memory layout
+use stm32f1xx_hal::{pac, prelude::*, serial::Config, serial::Serial}; // memory layout
 
 use panic_probe as _;
 
