@@ -8,12 +8,14 @@ use cortex_m_rt::entry;
 use embedded_midi::{MidiMessage, MidiOut};
 use nb::block;
 use stm32f1xx_hal::{
-    gpio::{gpioa::Parts, Input, Pin, PullDown, CRL},
+    gpio::{gpioa::Parts, Input, Pin, PullDown, CRL,CRH, gpiob},
     pac,
     prelude::*,
     serial::{Config, Serial},
     timer::Timer,
 };
+mod util;
+use util::Keys;
 
 #[entry]
 fn main() -> ! {
@@ -31,21 +33,24 @@ fn main() -> ! {
 
     // Setup GPIOA
     let mut gpioa = dp.GPIOA.split();
+    // Setup GPIOB
+    let mut gpiob = dp.GPIOB.split();
     //Setup GPIOC
     let mut gpioc = dp.GPIOC.split();
 
 
     // Configure pa4 as pull down input
-    let mut inp_4 = gpioa.pa4.into_pull_down_input(&mut gpioa.crl);
+    // let mut inp_4 = gpioa.pa4.into_pull_down_input(&mut gpioa.crl);
     //Configure pa5 as pull down
-    let mut inp_5 = gpioa.pa5.into_pull_down_input(&mut gpioa.crl);
+    // let mut inp_5 = gpioa.pa5.into_pull_down_input(&mut gpioa.crl);
     //Configure embed led
     let mut led = gpioc.pc13.into_push_pull_output(&mut gpioc.crh);
 
-    // USART1 on Pins A9 and A10
-    let pin_tx = gpioa.pa9.into_alternate_push_pull(&mut gpioa.crh);
-    let pin_rx = gpioa.pa10;
+    let mut w_keys = Keys::new( gpioa);
 
+    // USART1 on pins B6 and B7
+    let pin_tx = gpiob.pb6.into_alternate_push_pull(&mut gpiob.crl);
+    let pin_rx = gpiob.pb7;// Can I free this pin?
     let usart = Serial::usart1(
         dp.USART1,
         (pin_tx, pin_rx),
@@ -57,26 +62,56 @@ fn main() -> ! {
     let (tx, _rx) = usart.split();
 
     let mut midi_out = MidiOut::new(tx);
-
+    
     loop {
-        //c4
-        if inp_4.is_high() {
-            defmt::println!("4 is pressed {:?}", inp_4.is_high());
+        //C4
+        if w_keys.c.is_high() {
             midi_out.write(&set_event(true, 60u8)).ok();
-        } else if inp_4.is_low() {
+        } else if w_keys.c.is_low() {
             midi_out.write(&set_event(false, 60u8)).ok();
         }
-        //d4
-        if inp_5.is_high() {
+        //Db
+        if w_keys.d_b.is_high() {
+            midi_out.write(&set_event(true, 61u8)).ok();
+        } else if w_keys.d_b.is_low() {
+            midi_out.write(&set_event(false, 61u8)).ok();
+        }
+        //D4
+        if w_keys.d.is_high() {
             midi_out.write(&set_event(true, 62u8)).ok();
-        } else if inp_5.is_low() {
+        } else if w_keys.d.is_low() {
             midi_out.write(&set_event(false, 62u8)).ok();
         }
-        // if inp_6.is_high() {
-        //     midi_out.write(&set_event(true, 64u8)).ok();
-        // } else if inp_6.is_low() {
-        //     midi_out.write(&set_event(false, 64u8)).ok();
-        // }
+        //Eb4
+        if w_keys.e_b.is_high() {
+            midi_out.write(&set_event(true, 63u8)).ok();
+        } else if w_keys.e_b.is_low() {
+            midi_out.write(&set_event(false, 63u8)).ok();
+        }
+        //E4
+        if w_keys.e.is_high() {
+            midi_out.write(&set_event(true, 64u8)).ok();
+        } else if w_keys.e.is_low() {
+            midi_out.write(&set_event(false, 64u8)).ok();
+        }
+        //F4
+        if w_keys.f.is_high() {
+            midi_out.write(&set_event(true, 65u8)).ok();
+        } else if w_keys.f.is_low() {
+            midi_out.write(&set_event(false, 65u8)).ok();
+        }
+        //Gb4
+        if w_keys.g_b.is_high() {
+            midi_out.write(&set_event(true, 66u8)).ok();
+        } else if w_keys.g_b.is_low() {
+            midi_out.write(&set_event(false, 66u8)).ok();
+        }
+        //G4
+        if w_keys.g.is_high() {
+            midi_out.write(&set_event(true, 67u8)).ok();
+        } else if w_keys.g.is_low() {
+            midi_out.write(&set_event(false, 67u8)).ok();
+        }
     }
 }
 
